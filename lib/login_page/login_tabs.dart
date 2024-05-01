@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:messanger/login_form.dart';
-import 'package:messanger/sign_up_form.dart';
+import 'package:messanger/login_page/login_form.dart';
+import 'package:messanger/login_page/sign_up_form.dart';
 
 class LoginTabs extends StatefulWidget {
   const LoginTabs({super.key, required this.onTabChange, required this.serverUrl});

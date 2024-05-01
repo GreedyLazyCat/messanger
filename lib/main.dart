@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:messanger/login_form.dart';
-import 'package:messanger/login_tabs.dart';
-import 'package:messanger/settings_page.dart';
-import 'package:messanger/sign_up_form.dart';
+import 'package:messanger/chats_page/chat_main_page.dart';
+import 'package:messanger/login_page/login_form.dart';
+import 'package:messanger/login_page/login_tabs.dart';
+import 'package:messanger/login_page/settings_page.dart';
+import 'package:messanger/login_page/sign_up_form.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -51,8 +52,8 @@ class _MessangerAppState extends State<MessangerApp> {
 
   @override
   void initState() {
-    _getServerUri();
     super.initState();
+    _getServerUri();
   }
 
 
