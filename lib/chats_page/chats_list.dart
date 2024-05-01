@@ -11,7 +11,9 @@ import 'package:messanger/chats_page/ws_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatList extends StatefulWidget {
-  const ChatList({super.key});
+  const ChatList({super.key, required this.controller});
+
+  final WsController controller;
 
   @override
   State<ChatList> createState() => _ChatListState();
@@ -49,56 +51,27 @@ class _ChatListState extends State<ChatList> {
   @override
   void initState() {
     super.initState();
-    wsController = _getController();
+    // wsController = _getController();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: wsController,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final controller = snapshot.data as WsController;
-          return ListenableBuilder(
-            listenable: controller,
+
+    return ListenableBuilder(
+            listenable: widget.controller,
             builder: (context, child) {
               return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: ListView.builder(
-                    itemCount: controller.chatrooms.length,
+                    itemCount: widget.controller.chatrooms.length,
                     itemBuilder: (context, index) {
                       return ChatroomItem(
-                          chatroomIndex: index, controller: controller);
+                          chatroomIndex: index, controller: widget.controller);
                     },
                   ));
             },
           );
-        } else if (snapshot.hasError) {
-          return Center(
-            child: Column(
-              children: <Widget>[
-                const Icon(
-                  Icons.error_outline,
-                  color: Colors.red,
-                  size: 60,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: Text('Error: ${snapshot.error}'),
-                ),
-              ],
-            ),
-          );
-        } else {
-          return const Center(
-            child: SizedBox(
-              width: 60,
-              height: 60,
-              child: CircularProgressIndicator(),
-            ),
-          );
-        }
-      },
-    );
+
+  
   }
 }

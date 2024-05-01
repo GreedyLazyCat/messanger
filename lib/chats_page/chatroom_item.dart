@@ -1,8 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:messanger/api/models/chatroom.dart';
 import 'package:messanger/api/models/message.dart';
 import 'package:messanger/api/models/user.dart';
@@ -41,10 +39,10 @@ class _ChatroomItemState extends State<ChatroomItem> {
 
   @override
   void initState() {
+    debugPrint('Item init state');
     super.initState();
     chatroom = widget.controller.chatrooms[widget.chatroomIndex];
 
-    lastMessage = widget.controller.newMessages[chatroom.id];
 
     if (chatroom.type == 'pm') {
       futureTitle = _getTitleByUser();
@@ -57,6 +55,8 @@ class _ChatroomItemState extends State<ChatroomItem> {
   }
 
   Widget _buildLoaded(BuildContext context, String? title) {
+    lastMessage = widget.controller.newMessages[chatroom.id];
+
     Color grey = Colors.grey[300]!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),

@@ -11,4 +11,8 @@ class WsController extends ChangeNotifier {
   ///[Message] - последнее сообщение для чатрума
   Map<String, Message?> newMessages = {};
   User user = User(id: '', login: 'login');
+
+  void test(){
+    notifyListeners();
+  }
 }
