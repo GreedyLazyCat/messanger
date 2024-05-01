@@ -26,6 +26,16 @@ class Chatroom {
     lastMessageId = decoded['lastMessage_id'] as String;
   }
 
+  Chatroom.fromObject(Object json) {
+    final decoded = json as Map<String, dynamic>;
+
+    id = decoded['id'] as String;
+    type = decoded['type'] as String;
+    title = decoded['title'] as String;
+    participantIds = (decoded['participant_ids'] as List<dynamic>).cast<String>();
+    lastMessageId = decoded['lastMessage_id'] as String;
+  }
+
   String toJson() {
     return jsonEncode({
       'id': id,

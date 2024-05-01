@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:messanger/api/models/chatroom.dart';
 import 'package:messanger/api/models/message.dart';
+import 'package:messanger/api/models/user.dart';
 
 Future<http.Response> pingServer(Uri serverUri) {
   return http.get(serverUri);
@@ -20,17 +21,33 @@ Future<http.Response> signUp(Uri serverUri, String login, String password) {
       body: jsonEncode({'login': login, 'password': password}));
 }
 
-Future<http.Response> getUserByToken(Uri serverUri, String token) async {
-  return http.get(serverUri, headers: {'Authorization': 'Bearer $token'});
+Future<User> getUserByToken(Uri serverUri, String token) async {
+  final response = await http.get(Uri.http(serverUri.authority, '/users/read'),
+      headers: {'Authorization': 'Bearer $token'});
+  final body = jsonDecode(response.body) as Map<String, dynamic>;
+  final user = User(id: body['id'] as String, login: body['login'] as String);
+  return user;
 }
 
-Future<List<String>> getUserChatrooms(Uri serverUri, String token) async {
+Future<User> getUserById(Uri serverUri, String id, String token) async {
+  final response = await http.post(Uri.http(serverUri.authority, '/users/readone'),
+      headers: {'Authorization': 'Bearer $token'}, body: '{"user_id": "$id"}');
+  final body = jsonDecode(response.body) as Map<String, dynamic>;
+  final user = User(id: body['id'] as String, login: body['login'] as String);
+  return user;
+}
+
+Future<List<Chatroom>> getUserChatrooms(Uri serverUri, String token) async {
   final response = await http.get(
       Uri.http(serverUri.authority, '/chatrooms/read'),
       headers: {'Authorization': 'Bearer $token'});
+
   final body = jsonDecode(response.body) as Map<String, dynamic>;
-  final result = body['chatroom_ids'] as List<dynamic>;
-  return result.cast<String>();
+  final result = (body['chatrooms'] as List<dynamic>).map((e) {
+    return Chatroom.fromObject(e);
+  }).toList();
+
+  return result;
 }
 
 Future<Chatroom> getChatroomById(
@@ -39,7 +56,7 @@ Future<Chatroom> getChatroomById(
       Uri.http(serverUri.authority, '/chatrooms/readone'),
       headers: {'Authorization': 'Bearer $token'},
       body: '{"chatroom_id": "$chatroomId"}');
-  debugPrint(response.body);
+  // debugPrint(response.body);
 
   return Chatroom.fromJson(response.body);
 }

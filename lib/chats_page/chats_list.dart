@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:messanger/api/models/chatroom.dart';
+import 'package:messanger/api/models/message.dart';
 import 'package:messanger/api/models/user.dart';
 import 'package:messanger/api/server_api.dart';
-import 'package:messanger/chats_page/chat_list_controller.dart';
 import 'package:messanger/chats_page/chatroom_item.dart';
+import 'package:messanger/chats_page/ws_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatList extends StatefulWidget {
@@ -15,59 +18,86 @@ class ChatList extends StatefulWidget {
 }
 
 class _ChatListState extends State<ChatList> {
-  String token = '';
-  User user = User(id: 'id', login: 'login');
-  Uri serverUri = Uri();
-  List<String> chatroomIds = ['first'];
-  ChatListController controller = ChatListController();
+  late Future<WsController> wsController;
 
-  Future<void> _asyncInitState() async {
+  Future<WsController> _getController() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      token = prefs.getString('token') ?? 'no token';
+    final controller = WsController();
 
-      serverUri = Uri.parse(prefs.getString('serverUri') ?? 'http://localhost');
-    });
-    if (token != 'no token') {
-      var response = await getUserByToken(
-          Uri.http(serverUri.authority, '/users/read'), token);
-      setState(() {
-        final body = jsonDecode(response.body) as Map<String, dynamic>;
-        user = User(id: body['id'] as String, login: body['login'] as String);
-      });
+    controller.token = prefs.getString('token') ?? 'no token';
+    controller.serverUri =
+        Uri.parse(prefs.getString('serverUri') ?? 'http://localhost');
 
-      final chatrooms = await getUserChatrooms(serverUri, token);
-
-      setState(() {
-        chatroomIds = chatrooms;
-        // debugPrint(chatroomIds.toString());
-      });
+    if (controller.token != 'no token') {
+      controller.user =
+          await getUserByToken(controller.serverUri, controller.token);
+      controller.chatrooms =
+          (await getUserChatrooms(controller.serverUri, controller.token))!;
+      for (var chatroom in controller.chatrooms) {
+        if (chatroom.lastMessageId != 'none') {
+          final lastMessage = await getMessageById(
+              controller.serverUri, chatroom.lastMessageId!, controller.token);
+          controller.newMessages.addAll({chatroom.id: lastMessage});
+        } else {
+          controller.newMessages.addAll({chatroom.id: null});
+        }
+      }
     }
+    return controller;
   }
 
   @override
   void initState() {
     super.initState();
-    // _asyncInitState();
-    controller.initState();
+    wsController = _getController();
   }
 
   @override
   Widget build(BuildContext context) {
-    // debugPrint('build called');
-    // debugPrint('chatroomId:v${chatroomIds[0]}, token: $token, serverUri: serverUri');
-
-    return ListenableBuilder(
-      listenable: controller,
-      builder: (context, child) {
-        return ListView.builder(
-            padding: const EdgeInsets.all(8),
-            itemCount: controller.chatrooms.length,
-            itemBuilder: (BuildContext context, int index) {
-              return ChatroomItem(
-                  chatroomIndex: index,
-                  controller: controller);
-            });
+    return FutureBuilder(
+      future: wsController,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final controller = snapshot.data as WsController;
+          return ListenableBuilder(
+            listenable: controller,
+            builder: (context, child) {
+              return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: ListView.builder(
+                    itemCount: controller.chatrooms.length,
+                    itemBuilder: (context, index) {
+                      return ChatroomItem(
+                          chatroomIndex: index, controller: controller);
+                    },
+                  ));
+            },
+          );
+        } else if (snapshot.hasError) {
+          return Center(
+            child: Column(
+              children: <Widget>[
+                const Icon(
+                  Icons.error_outline,
+                  color: Colors.red,
+                  size: 60,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Text('Error: ${snapshot.error}'),
+                ),
+              ],
+            ),
+          );
+        } else {
+          return const Center(
+            child: SizedBox(
+              width: 60,
+              height: 60,
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
       },
     );
   }
