@@ -18,6 +18,15 @@ class Message {
     body = decoded['body'];
   }
 
+  Message.fromObject(Object object){
+    final decoded = object as Map<String, dynamic>;
+    
+    id = decoded['id'];
+    chatroomId = decoded['chatroom_id'];
+    authorId = decoded['author_id'];
+    body = decoded['body'];
+  }
+
   String toJson() {
     return jsonEncode(
         {'chatroom_id': chatroomId, 'author_id': authorId, 'body': body});

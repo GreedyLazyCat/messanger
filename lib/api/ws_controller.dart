@@ -12,6 +12,8 @@ class WsController extends ChangeNotifier {
   Map<String, Message?> newMessages = {};
   User user = User(id: '', login: 'login');
 
+  
+
   void test(){
     notifyListeners();
   }

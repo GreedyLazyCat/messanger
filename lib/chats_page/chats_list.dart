@@ -7,7 +7,7 @@ import 'package:messanger/api/models/message.dart';
 import 'package:messanger/api/models/user.dart';
 import 'package:messanger/api/server_api.dart';
 import 'package:messanger/chats_page/chatroom_item.dart';
-import 'package:messanger/chats_page/ws_controller.dart';
+import 'package:messanger/api/ws_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatList extends StatefulWidget {
@@ -51,7 +51,7 @@ class _ChatListState extends State<ChatList> {
   @override
   void initState() {
     super.initState();
-    // wsController = _getController();
+    wsController = _getController();
   }
 
   @override

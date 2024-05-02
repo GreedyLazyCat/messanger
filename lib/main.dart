@@ -1,13 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:messanger/chats_page/chat_main_page.dart';
-import 'package:messanger/login_page/login_form.dart';
 import 'package:messanger/login_page/login_tabs.dart';
 import 'package:messanger/login_page/settings_page.dart';
-import 'package:messanger/login_page/sign_up_form.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(const MaterialApp(home: MessangerApp()));
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('token') ?? 'no token';
+  final initialRoute = token == 'no token'? '/login' : '/chats';
+  debugPrint(initialRoute);
+  runApp(MaterialApp(
+    initialRoute: initialRoute,
+    routes: {
+      '/login': (context) => const MessangerApp(),
+      '/chats': (context) => const ChatsMainPage(),
+    },
+  ));
 }
 
 class MessangerApp extends StatefulWidget {
@@ -35,6 +44,11 @@ class _MessangerAppState extends State<MessangerApp> {
     }
   }
 
+  Future<void> _setAuthToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('token', token);
+  }
+
   Future<void> _getServerUri() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -54,8 +68,8 @@ class _MessangerAppState extends State<MessangerApp> {
   void initState() {
     super.initState();
     _getServerUri();
+    _setAuthToken('no token');
   }
-
 
   @override
   Widget build(BuildContext context) {

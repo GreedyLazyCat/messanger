@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:messanger/api/models/message.dart';
 import 'package:messanger/api/server_api.dart';
 import 'package:messanger/chats_page/chats_list.dart';
-import 'package:messanger/chats_page/ws_controller.dart';
+import 'package:messanger/api/ws_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatsMainPage extends StatefulWidget {
@@ -20,6 +20,7 @@ class _ChatsMainPageState extends State<ChatsMainPage> {
     final controller = WsController();
 
     controller.token = prefs.getString('token') ?? 'no token';
+    debugPrint(controller.token);
     controller.serverUri =
         Uri.parse(prefs.getString('serverUri') ?? 'http://localhost');
 
@@ -41,8 +42,14 @@ class _ChatsMainPageState extends State<ChatsMainPage> {
     return controller;
   }
 
+  Future<void> _setAuthToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('token', token);
+  }
+
   @override
   void initState() {
+    debugPrint('chats init state');
     super.initState();
     wsController = _getController();
   }
@@ -52,12 +59,22 @@ class _ChatsMainPageState extends State<ChatsMainPage> {
     return Scaffold(
         appBar: AppBar(
           title: const Text('Чаты'),
+          actions: [
+            IconButton(onPressed: () {
+              _setAuthToken('no token');
+              Navigator.pushReplacementNamed(context, '/login');
+            }, icon: const Icon(Icons.logout))
+          ],
         ),
         floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.add),
           onPressed: () async {
             final controller = await wsController;
-            controller.newMessages['first'] = Message(id: 'safdsfasdf', chatroomId: 'dasdf', authorId: 'asdf', body: 'asdf');
+            controller.newMessages['first'] = Message(
+                id: 'safdsfasdf',
+                chatroomId: 'dasdf',
+                authorId: 'asdf',
+                body: 'asdf');
             controller.test();
           },
         ),

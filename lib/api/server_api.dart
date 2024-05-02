@@ -30,8 +30,10 @@ Future<User> getUserByToken(Uri serverUri, String token) async {
 }
 
 Future<User> getUserById(Uri serverUri, String id, String token) async {
-  final response = await http.post(Uri.http(serverUri.authority, '/users/readone'),
-      headers: {'Authorization': 'Bearer $token'}, body: '{"user_id": "$id"}');
+  final response = await http.post(
+      Uri.http(serverUri.authority, '/users/readone'),
+      headers: {'Authorization': 'Bearer $token'},
+      body: '{"user_id": "$id"}');
   final body = jsonDecode(response.body) as Map<String, dynamic>;
   final user = User(id: body['id'] as String, login: body['login'] as String);
   return user;
@@ -67,6 +69,19 @@ Future<Message> getMessageById(
       Uri.http(serverUri.authority, '/messages/readone'),
       headers: {'Authorization': 'Bearer $token'},
       body: '{"message_id": "$messageId"}');
-  debugPrint(response.body);
   return Message.fromJson(response.body);
+}
+
+Future<List<Message>> getChatroomMessages(
+    Uri serverUri, String chatroomId, String token) async {
+  final response = await http.post(
+      Uri.http(serverUri.authority, '/messages/read'),
+      headers: {'Authorization': 'Bearer $token'},
+      body: '{"chatroom_id": "$chatroomId"}');
+  final body = jsonDecode(response.body) as Map<String, dynamic>;
+  final messages = (body['messages'] as List<dynamic>).map((e) {
+    return Message.fromObject(e);
+  }).toList();
+
+  return messages;
 }

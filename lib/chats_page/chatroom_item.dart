@@ -1,11 +1,13 @@
 import 'dart:async';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:messanger/api/models/chatroom.dart';
 import 'package:messanger/api/models/message.dart';
 import 'package:messanger/api/models/user.dart';
 import 'package:messanger/api/server_api.dart';
-import 'package:messanger/chats_page/ws_controller.dart';
+import 'package:messanger/api/ws_controller.dart';
+import 'package:messanger/single_chat_page/single_chat_page_main.dart';
 
 class ChatroomItem extends StatefulWidget {
   const ChatroomItem(
@@ -43,7 +45,6 @@ class _ChatroomItemState extends State<ChatroomItem> {
     super.initState();
     chatroom = widget.controller.chatrooms[widget.chatroomIndex];
 
-
     if (chatroom.type == 'pm') {
       futureTitle = _getTitleByUser();
     } else {
@@ -56,34 +57,51 @@ class _ChatroomItemState extends State<ChatroomItem> {
 
   Widget _buildLoaded(BuildContext context, String? title) {
     lastMessage = widget.controller.newMessages[chatroom.id];
-
+    final lastMessageText =
+        (lastMessage != null) ? lastMessage!.body : 'Здесь пока нет сообщений';
+    final finalTitle = (title ?? 'no title');
     Color grey = Colors.grey[300]!;
+
+    return ListTile(
+      title: Text(finalTitle),
+      subtitle: Text(lastMessageText, overflow: TextOverflow.fade),
+      onTap: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SingleChatPage(
+                  controller: widget.controller,
+                  chatroom: chatroom,
+                  title: finalTitle),
+            ));
+      },
+    );
+/*
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(width: 1, color: Colors.grey[300]!))),
+          border:
+              Border(bottom: BorderSide(width: 1, color: Colors.grey[300]!))),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
               padding: const EdgeInsets.symmetric(vertical: 2),
               child: Text(
-                (title ?? 'no title'),
+                finalTitle,
                 style: const TextStyle(fontSize: 20),
               )),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 2),
             child: Text(
-              ((lastMessage != null)
-                  ? lastMessage!.body
-                  : 'Здесь пока нет сообщений'),
+              (lastMessageText),
               overflow: TextOverflow.fade,
               style: const TextStyle(fontSize: 15),
             ),
           )
         ],
       ),
-    );
+    );*/
   }
 
   @override

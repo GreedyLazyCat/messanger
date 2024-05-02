@@ -70,11 +70,7 @@ class _LoginFormState extends State<LoginForm> {
                             ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                     content: Text('Authorized succesfully')));
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const ChatsMainPage()));
+                            Navigator.pushReplacementNamed(context, '/chats');
                           }
                         }
                       } catch (e) {
